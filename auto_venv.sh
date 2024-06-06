@@ -30,7 +30,7 @@ function evaluate_venv() {
               if evaluate_permissions "$activate_path"; then
                   source "$activate_path"
               else
-                  echo "Permissions on ${activate_path} not valid. Auto env did not activate."
+                  echo "Permissions on ${activate_path} not valid. Auto env did not activate." 1>&2
               fi
           fi
       fi
