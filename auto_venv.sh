@@ -44,7 +44,7 @@ function auto_venv_allow() {
 function auto_venv_disallow() {
     touch ~/.auto_venvrc 
     local allow_list
-    allow_list=$(grep -v "$PWD" "$AUTO_VENV_ALLOW_FILE")
+    allow_list=$(grep -Ev "^$PWD\$" "$AUTO_VENV_ALLOW_FILE")
     echo "$allow_list" > "$AUTO_VENV_ALLOW_FILE"
     if [[ -n "$VIRTUAL_ENV" ]] ; then
         deactivate
