@@ -1,3 +1,4 @@
+# shellcheck source=/dev/null
 # manage python venv
 
 export AUTO_VENV_ALLOW_FILE=~/.auto_venv_allow
@@ -8,16 +9,16 @@ function auto_venv_allowed() {
 
 function evaluate_venv() {
   if [[ -z "$VIRTUAL_ENV" ]] ; then
-      local activate_path=""
+      local activate_path
       ## If env folder is found then activate the vitualenv
       if [[ -d ./.env ]] ; then
           activate_path=./.env/bin/activate
       elif [[ -d ./.venv ]]; then
           activate_path=./.venv/bin/activate
       fi
-      if [[ ! -z $activate_path ]]; then
-          if [[ ! -z $(auto_venv_allowed) ]] ; then
-              source $activate_path
+      if [[ -n $activate_path ]]; then
+          if [[ -n $(auto_venv_allowed) ]] ; then
+              source "$activate_path"
           fi
       fi
   else
@@ -33,22 +34,24 @@ function evaluate_venv() {
 }
 
 function auto_venv_allow() {
-    echo $PWD >> $AUTO_VENV_ALLOW_FILE
-    local allow_list=$(sort "$AUTO_VENV_ALLOW_FILE" | uniq )
+    echo "$PWD" >> "$AUTO_VENV_ALLOW_FILE"
+    local allow_list
+    allow_list=$(sort "$AUTO_VENV_ALLOW_FILE" | uniq )
     echo "$allow_list" > "$AUTO_VENV_ALLOW_FILE"
     evaluate_venv
 }
 
 function auto_venv_disallow() {
     touch ~/.auto_venvrc 
-    local allow_list=$(grep -v "$PWD" "$AUTO_VENV_ALLOW_FILE")
-    echo $allow_list > "$AUTO_VENV_ALLOW_FILE"
-    if [[ ! -z "$VIRTUAL_ENV" ]] ; then
+    local allow_list
+    allow_list=$(grep -v "$PWD" "$AUTO_VENV_ALLOW_FILE")
+    echo "$allow_list" > "$AUTO_VENV_ALLOW_FILE"
+    if [[ -n "$VIRTUAL_ENV" ]] ; then
         deactivate
     fi
 }
 
 function cd() {
-  builtin cd "$@"
+  builtin cd "$@" || return
   evaluate_venv
 }
