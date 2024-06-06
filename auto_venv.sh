@@ -7,6 +7,15 @@ function auto_venv_allowed() {
     grep -E "^$PWD\$" "$AUTO_VENV_ALLOW_FILE"
 }
 
+function evaluate_permissions() {
+    if [ "$(id -u)" = "$(stat -f "%u" "$1")" ]; then
+        if [[ -r "$1" ]]; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
 function evaluate_venv() {
   if [[ -z "$VIRTUAL_ENV" ]] ; then
       local activate_path
@@ -18,7 +27,11 @@ function evaluate_venv() {
       fi
       if [[ -n $activate_path ]]; then
           if [[ -n $(auto_venv_allowed) ]] ; then
-              source "$activate_path"
+              if evaluate_permissions "$activate_path"; then
+                  source "$activate_path"
+              else
+                  echo "Permissions on ${activate_path} not valid. Auto env did not activate."
+              fi
           fi
       fi
   else
